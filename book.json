@@ -1,0 +1,46 @@
+{
+  "books": [
+    {
+      "title": "The Hobbit",
+      "author": "J.R.R.Tolien",
+      "pageCount": 310,
+      "readingStatus": "unread",
+      "currentPage": 0
+    },
+    {
+      "title": "Die Wunderuebung",
+      "author": "Daniel Glattauer",
+      "pageCount": 111,
+      "readingStatus": "unread",
+      "currentPage": 0
+    },
+    {
+      "title": "Circe",
+      "author": "Madeline Miller",
+      "pageCount": 393,
+      "readingStatus": "read",
+      "currentPage": 393
+    },
+    {
+      "title": "Song of Achilles",
+      "author": "Madeline Miller",
+      "pageCount": 408,
+      "readingStatus": "ongoing",
+      "currentPage": 33
+    },
+    {
+      "title": "Homo Faber",
+      "author": "Max Frisch",
+      "pageCount": 202,
+      "readingStatus": "read",
+      "currentPage": 202
+    },
+    {
+      "title": "Book",
+      "author": "Author",
+      "pageCount": 100,
+      "readingStatus": "read",
+      "currentPage": 100
+    }
+  ]
+}
