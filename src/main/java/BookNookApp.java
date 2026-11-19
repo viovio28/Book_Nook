@@ -30,7 +30,7 @@ public class BookNookApp extends Application {
             showDetailsButton.setOnAction(event -> {
                 Book selectedBook = bookList.getSelectionModel().getSelectedItem();
                 if(selectedBook != null){
-                    showBookDetails(primaryStage,selectedBook);
+                    showBookDetails(primaryStage, bookList, selectedBook);
                 }
             });
 
@@ -97,6 +97,7 @@ public class BookNookApp extends Application {
         Button saveButton = new Button("Save Book");
 
         saveButton.setOnAction(event -> {
+
             String title = titleInput.getText().trim();
             String author = authorInput.getText().trim();
 
@@ -132,6 +133,7 @@ public class BookNookApp extends Application {
             }
 
             bookList.getItems().setAll(library.getBooks());
+
             popup.close();
         });
 
@@ -144,12 +146,13 @@ public class BookNookApp extends Application {
 
         popup.setScene(new Scene(form, 450, 350));
         popup.show();
+        bookList.refresh();
 
 
 
     }
 
-    private void showBookDetails(Stage stage, Book book){
+    private void showBookDetails(Stage stage, ListView<Book> bookList, Book book){
         Scene previousScene = stage.getScene();
 
         Button backButton = new Button("back");
@@ -157,21 +160,58 @@ public class BookNookApp extends Application {
             stage.setScene(previousScene);
         });
 
-        Label details = new Label(book.toString());
+        Label details = new Label("Title: " + book.getTitle() + "\nAuthor: " + book.getAuthor() + "\nReading status:");
+
+        RadioButton unreadButton = new RadioButton("Unread");
+        RadioButton readButton = new RadioButton("read");
+        RadioButton ongoingButton = new RadioButton("Currently reading");
+
+        ToggleGroup statusGroup = new ToggleGroup();
+        unreadButton.setToggleGroup(statusGroup);
+        readButton.setToggleGroup(statusGroup);
+        ongoingButton.setToggleGroup(statusGroup);
+
+        unreadButton.setUserData(Book.ReadingStatus.unread);
+        readButton.setUserData(Book.ReadingStatus.read);
+        ongoingButton.setUserData(Book.ReadingStatus.ongoing);
+
+
+        HBox statusOptions = new HBox(
+                10, unreadButton, readButton, ongoingButton
+        );
+
+        switch (book.getReadingStatus()) {
+            case unread -> unreadButton.setSelected(true);
+            case read -> readButton.setSelected(true);
+            case ongoing -> ongoingButton.setSelected(true);
+        }
+
+        Book.ReadingStatus status = (Book.ReadingStatus) statusGroup.getSelectedToggle().getUserData();
+        if(status == Book.ReadingStatus.ongoing){
+            TextField currentPageInput = new TextField(String.valueOf(book.getPageCount()));
+            int currentPage = Integer.parseInt(String.valueOf(currentPageInput));
+            book.setCurrentPage(currentPage);
+        }
 
         ProgressBar progressBar = new ProgressBar(book.readingProgress()/100.0);
 
         Button changeDetails = new Button("edit");
             changeDetails.setOnAction(event -> {
-                showEditBookDetails(stage, book);
+                showEditBookDetails(stage, bookList, book, () ->{
+                    details.setText(book.toString());
+                    progressBar.setProgress(book.readingProgress()/100.0);
+                });
             });
 
-        VBox layout = new VBox(10, backButton,details,changeDetails,progressBar);
+        VBox layout = new VBox(10, backButton,details,statusOptions,progressBar,changeDetails );
         Scene detailsScene = new Scene(layout, 800, 600);
         stage.setScene(detailsScene);
+        bookList.refresh();
+        bookList.getSelectionModel().getSelectedItem();
     }
 
-    private void showEditBookDetails(Stage stage, Book book){
+
+    private void showEditBookDetails(Stage stage,ListView<Book> bookList, Book book, Runnable onSave){
         Stage popup = new Stage();
         popup.setTitle("edit book");
         popup.initOwner(stage);
@@ -182,6 +222,8 @@ public class BookNookApp extends Application {
         TextField authorInput = new TextField(book.getAuthor());
 
         TextField pageCountInput = new TextField(String.valueOf(book.getPageCount()));
+
+
 
         Label feedback = new Label();
         Button saveButton = new Button("Save Book");
@@ -207,6 +249,9 @@ public class BookNookApp extends Application {
                 feedback.setText("Saving failed. Please try again.");
                 return;
             }
+
+            bookList.refresh();
+            onSave.run();
             popup.close();
         });
 
@@ -218,6 +263,7 @@ public class BookNookApp extends Application {
 
         popup.setScene(new Scene(form, 450, 350));
         popup.show();
+
 
 
 
