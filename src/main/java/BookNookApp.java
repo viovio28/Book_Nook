@@ -26,8 +26,16 @@ public class BookNookApp extends Application {
         Button addButton = new Button("Add new Book");
             addButton.setOnAction(event -> showAddBookWindow(primaryStage, bookList));
 
+        Button showDetailsButton = new Button("Show details");
+            showDetailsButton.setOnAction(event -> {
+                Book selectedBook = bookList.getSelectionModel().getSelectedItem();
+                if(selectedBook != null){
+                    showBookDetails(primaryStage,selectedBook);
+                }
+            });
 
-        VBox layout = new VBox(20, heading, bookList, addButton );
+
+        VBox layout = new VBox(20, heading, bookList, addButton, showDetailsButton );
 
         Scene scene = new Scene(layout, 800, 600);
 
@@ -138,9 +146,81 @@ public class BookNookApp extends Application {
         popup.show();
 
 
+
     }
 
-    private void showBookDetails(Stage owner, Book book){
+    private void showBookDetails(Stage stage, Book book){
+        Scene previousScene = stage.getScene();
+
+        Button backButton = new Button("back");
+        backButton.setOnAction(event -> {
+            stage.setScene(previousScene);
+        });
+
+        Label details = new Label(book.toString());
+
+        ProgressBar progressBar = new ProgressBar(book.readingProgress()/100.0);
+
+        Button changeDetails = new Button("edit");
+            changeDetails.setOnAction(event -> {
+                showEditBookDetails(stage, book);
+            });
+
+        VBox layout = new VBox(10, backButton,details,changeDetails,progressBar);
+        Scene detailsScene = new Scene(layout, 800, 600);
+        stage.setScene(detailsScene);
+    }
+
+    private void showEditBookDetails(Stage stage, Book book){
+        Stage popup = new Stage();
+        popup.setTitle("edit book");
+        popup.initOwner(stage);
+        popup.initModality(Modality.WINDOW_MODAL);
+
+        TextField titleInput = new TextField(book.getTitle());
+
+        TextField authorInput = new TextField(book.getAuthor());
+
+        TextField pageCountInput = new TextField(String.valueOf(book.getPageCount()));
+
+        Label feedback = new Label();
+        Button saveButton = new Button("Save Book");
+
+        saveButton.setOnAction(event -> {
+            String title = titleInput.getText().trim();
+            String author = authorInput.getText().trim();
+
+            if(title.isBlank() || author.isBlank()){
+                feedback.setText("Please enter title and author.");
+                return;
+            }
+
+            int pageCount = Integer.parseInt(pageCountInput.getText().trim());
+
+            book.setTitle(title);
+            book.setAuthor(author);
+            book.setPageCount(pageCount);
+
+            try {
+                storage.save(library);
+            } catch (IOException e) {
+                feedback.setText("Saving failed. Please try again.");
+                return;
+            }
+            popup.close();
+        });
+
+        VBox form = new VBox(
+                10, titleInput, authorInput, pageCountInput, feedback, saveButton
+        );
+
+        form.setPadding(new Insets(20));
+
+        popup.setScene(new Scene(form, 450, 350));
+        popup.show();
+
+
+
 
     }
 

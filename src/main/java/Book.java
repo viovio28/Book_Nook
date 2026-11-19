@@ -66,8 +66,8 @@ public class Book {
         this.currentPage = currentPage;
     }
 
-    public int readingProgress(){
-       return getCurrentPage() / getPageCount() * 100;
+    public double readingProgress(){
+       return (double)currentPage / pageCount * 100;
     }
 
     public ReadingStatus getReadingStatus() {
